@@ -1,13 +1,27 @@
-BEGIN {FS=","}NR>1 {count++} 
-END {print "Jumlah seluruh penumpang KANJ adalah ", count, " orang"} 
+BEGIN {FS=",";choice = ARGV[2];delete ARGV[2]
+if (choice != "a" && choice != "b"&& choice != "c" && choice != "d" && choice != "e"){
+print"Soal tidak dikenali. Gunakan a,b,c,d atau e."; 
+print"Contoh penggunaan awk: - file.sh data.csv a"}
+}
 
-BEGIN {FS=","} NR>1 {carriage[$4]++} 
-END {print"Jumlah gerbong penumpang KANJ adalah",length(carriage)} 
+NR > 1 {
+if (choice =="a") count++
+if (choice =="b") carriage[$4]++
+if (choice =="c") {if($2>max) {max =$2;max_name=$1}}
+if (choice =="d") { total+=$2; count_person++ }
+if (choice =="e") if ($3 =="Business")count_business++
+}
 
-BEGIN{FS=","}NR>1{if($2>max) {max =$2;max_name=$1}}END {print max_name, "adalah penumpang kereta tertua dengan usia", max, " tahun"}
+END {
+if (choice =="a") 
+{print "Jumlah seluruh penumpang KANJ adalah ", count, " orang"}
+if (choice=="b")
+{print"Jumlah gerbong penumpang KANJ adalah",length(carriage)}
+if (choice=="c")
+{print max_name, "adalah penumpang kereta tertua dengan usia",max,"tahun"}
+if (choice =="d")
+{print "Rata-rata usia penumpang adalah", total/count_person, "tahun"}
+if (choice=="e")
+{print "Jumlah penumpang business class ada", count_business, "orang"}
+} 
 
-BEGIN {FS=","} NR>1 { total+=$2; count_person++ } 
-END {print "Rata-rata usia penumpang adalah",total/count_person, "tahun" }
-
-BEGIN {FS=","} NR>1 && /Business/ {++count_business} 
-END {print "Jumlah penumpang business class ada", count_business}

@@ -1,5 +1,17 @@
 #!/bin/bash
 
+
+if [[ "$1" == "--check-tagihan" ]]; then
+	#penggunaan " ada karena terdapat spasi beda saat di function hapus_penghuni 
+	cd /home/putri_permata_sabila/sisop/SISOP-1-2026-IT-047/soal_3
+	 date_automate_save=$(date "+%Y-%m-%d %H:%M:%S")
+
+	awk -v das="$date_automate_save" 'BEGIN {FS=","} $5=="Menunggak" {
+	print "["das"] TAGIHAN: "$1 "(Kamar " $2") -Menunggak Rp"$3
+	}' data/penghuni.csv >> log/tagihan.log 
+	exit 0 
+fi 
+
 menu_display(){
 echo ""
 echo "========================================================="
@@ -20,18 +32,43 @@ echo ""
 
 
 buat_cron(){
-local hour, minutes
+local hour minutes
 read -p "Masukkan Jam (0-23): " hour
 read -p "Masukkan Menit (0-59): " minutes
 
-crontan -l >&2 | grep -v "--check-tagihan > mycron
+#&>/dev/null buang stdout stderr
+#2>/dev/null buang stderr aja
+# -v berarti memilih semuanya kecuali --check-tagihan"
+crontab -l 2>/dev/null | grep -v "kost_slebew.sh --check-tagihan" > mycron 
 
-echo "$minutes $hour * * * /home/putri_permata_sabila/sisop/SISOP-1-2026-IT-047/soal_3 "$0") --check-tagihan">> mycron
+echo "$minutes $hour * * * $(realpath $0) --check-tagihan">> mycron
 crontab mycron
 rm mycron
 
-
 }
+
+lihat_cron(){
+
+echo ""
+echo "--- Daftar Cron Job Pengingat Tagihan ---"
+crontab -l 2>/dev/null | grep "kost_slebew.sh --check-tagihan" || echo "Tidak ada pengingat yang aktif"
+
+echo ""
+read -p "Tekan [ENTER] untuk kembali ke menu kelola cron..." dummy
+echo ""
+}
+
+hapus_cron(){
+crontab -l >&2 | grep -v "kost_slebew.sh --check-tagihan" > mycron
+crontab mycron
+rm mycron
+echo ""
+echo "[✓] Cron job pengingat tagihan berhasil dihapus."
+echo ""
+read -p "Tekan [ENTER] untuk kembali ke menu kelola cron..." dummy
+echo ""
+}
+
 menu_cron(){
 while true; do
 echo ""
@@ -45,8 +82,15 @@ echo "4. Kembali"
 echo "========================================================="
 read -p "Pilih [1-4]: " pilihan
 
-if [ "$pilihan" == "1" ]
+if [ "$pilihan" == "2" ];then buat_cron
+elif [ "$pilihan" == "1" ]; then lihat_cron
+elif [ "$pilihan" == "3" ]; then hapus_cron
+elif [ "$pilihan" == "4" ]; then break 
+break 
+else printf "Input tidak valid (Masukkan 1-4)"
+fi
 
+done
 }
 
 
@@ -203,8 +247,7 @@ echo ""
         while true; do
                 read -p "Masukkan Status Baru (Aktif/Menunggak):  " status_baru
                 if  [[ "$status_baru" == "Aktif" ||  "$status_baru" == "Menunggak" ]];then
-                        echo "$status_baru"
-                        break
+			break
                 else
                         echo "Status tidak sesuai ketentuan" >&2
                 fi
@@ -263,6 +306,8 @@ while true; do
 		update_status
 	elif [ "$option" == "5" ];then
 		cetak_laporan
+	elif [ "$option" == "6" ];then
+                menu_cron
 	else
 		echo "Input tidak valid, masukkan angka 1-7"
 	fi

@@ -8,4 +8,15 @@ Total tunggakan          : Rp0
 Jumlah kamar terisi      : 2
 ----------------------------------------------------- 
 Daftar penghuni menunggak:  
-  Tidak ada tunggakan.
+  Tidak ada tunggakan.Total pemasukan (Aktif)  : Rp 1280000
+Total tunggakan          : Rp0
+Jumlah kamar terisi      : 3
+----------------------------------------------------- 
+Daftar penghuni menunggak:  
+  Tidak ada tunggakan.Total pemasukan (Aktif)  : Rp 90000
+Total tunggakan          : Rp200000
+Jumlah kamar terisi      : 3
+----------------------------------------------------- 
+Daftar penghuni menunggak:  
+  - haihai
+  - salsa

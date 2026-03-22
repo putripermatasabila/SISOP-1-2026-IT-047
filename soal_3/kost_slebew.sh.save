@@ -18,39 +18,6 @@ echo "========================================================="
 echo ""
 }
 
-
-buat_cron(){
-local hour, minutes
-read -p "Masukkan Jam (0-23): " hour
-read -p "Masukkan Menit (0-59): " minutes
-
-crontan -l >&2 | grep -v "--check-tagihan > mycron
-
-echo "$minutes $hour * * * /home/putri_permata_sabila/sisop/SISOP-1-2026-IT-047/soal_3 "$0") --check-tagihan">> mycron
-crontab mycron
-rm mycron
-
-
-}
-menu_cron(){
-while true; do
-echo ""
-echo "========================================================="
-echo "                    MENU KELOLA CRON                     "
-echo "========================================================="
-echo "1. Lihat Cron Job Aktif"
-echo "2. Daftarkan Cron Job Pengingat"
-echo "3. Hapus Cron Job Pengingat"
-echo "4. Kembali"
-echo "========================================================="
-read -p "Pilih [1-4]: " pilihan
-
-if [ "$pilihan" == "1" ]
-
-}
-
-
-
 insert_date(){
 	while true; do
         	read -p "Masukkan Tanggal Masuk (YYYY-MM-DD): " date_in
@@ -247,6 +214,24 @@ echo ""
 read -p "Tekan [ENTER] untuk kembali ke menu..." dummy
 echo ""
 }
+
+menu_cron(){
+while true; do
+echo "========================================================="
+echo "                   MENU KELOLA CRON                      "
+echo "========================================================="
+echo "1. Lihat Cron Job Aktif"
+echo "2. Daftarkan Cron Job Pengingat"
+echo "3. Hapus Cron Job Pengingat"
+echo "4. Kembali"
+echo "========================================================="
+read -p "[1-4]: " pilihan
+
+	if [ "$pilihan" =="1" ]
+
+
+}
+
 
 while true; do
 	menu_display

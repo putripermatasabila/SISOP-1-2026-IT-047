@@ -33,8 +33,19 @@ echo ""
 
 buat_cron(){
 local hour minutes
+while true; do
 read -p "Masukkan Jam (0-23): " hour
+if [[ "$hour" =~ ^[0-9]+$ &&  "$hour" -le 23 ]]; then break
+else echo "Input tidak valid, masukkan jam (0-23)"
+fi
+done
+
+while true;do
 read -p "Masukkan Menit (0-59): " minutes
+if [[ "$minutes" =~ ^[0-9]+$ &&  "$minutes" -le 59 ]]; then break
+else echo "Input tidak valid, masukkan jam (0-59)"
+fi
+done
 
 #&>/dev/null buang stdout stderr
 #2>/dev/null buang stderr aja
@@ -59,7 +70,7 @@ echo ""
 }
 
 hapus_cron(){
-crontab -l >&2 | grep -v "kost_slebew.sh --check-tagihan" > mycron
+crontab -l  2>/dev/null | grep -v "kost_slebew.sh --check-tagihan" > mycron
 crontab mycron
 rm mycron
 echo ""
@@ -109,9 +120,14 @@ validate_kamar(){
 	local kamar
 	while true; do
 		read -p "Masukkan Nomor Kamar: " kamar
+
+		if [[ ! "$kamar" =~ ^[0-9]+$ ]];then 
+			echo "Nomor kamar harus positif" >&2
+			continue
+		fi
 		kamar=$((10#$kamar))
 		if grep -q ",$kamar," data/penghuni.csv; then
-			echo "Kamar sudah ditempati" >&2
+			echo "Kamar tidak tersedia" >&2
 		else
 			echo "$kamar"
 			break
@@ -186,32 +202,6 @@ read -p "Tekan [ENTER] untuk kembali ke menu..." dummy
 
 }
 
-hapus_penghuni(){
-	local nama tanggal_hapus
-echo ""
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	echo "                   HAPUS PENGHUNI                        "
-        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	while true; do
-		read -p "Masukkan nama penghuni yang akan dihapus:" nama
-		if grep -q "^$nama," data/penghuni.csv; then
-			break;
-		else
-			echo "Nama tidak ditemukan, coba lagi" >&2
-		fi
-	done
-	tanggal_hapus=$(date +%Y-%m-%d)
-	awk -v n="$nama" -v tgl="$tanggal_hapus" 'BEGIN {FS=","} $1==n {print $0","tgl}' data/penghuni.csv >> sampah/history_hapus.csv
-	sed -i "/^$nama,/d" data/penghuni.csv
-
-echo ""
-echo "[✓] Data penghuni $nama berhasil diarsipkan ke sampah/history_hapus.csv dan dihapus sistem "
-echo "" 
-
-read -p "Tekan [ENTER] untuk kembali ke menu..." dummy
-echo ""
-}
-
 tampilkan_daftar(){
 echo ""
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -230,6 +220,34 @@ print "---------------------------------------------------------"}' data/penghun
 echo ""
 }
 
+hapus_penghuni(){
+        local nama tanggal_hapus
+echo ""
+        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        echo "                   HAPUS PENGHUNI                        "
+        echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        while true; do
+                read -p "Masukkan nama penghuni yang akan dihapus:" nama
+                if grep -q "^$nama," data/penghuni.csv; then
+                        break;
+                else
+                        echo "Nama tidak ditemukan, coba lagi" >&2
+                        tampilkan_daftar
+                fi
+        done
+        tanggal_hapus=$(date +%Y-%m-%d)
+        awk -v n="$nama" -v tgl="$tanggal_hapus" 'BEGIN {FS=","} $1==n {print $0","tgl}' data/penghuni.csv >> sampah/history_hapus.csv
+        sed -i "/^$nama,/d" data/penghuni.csv
+
+echo ""
+echo "[✓] Data penghuni $nama berhasil diarsipkan ke sampah/history_hapus.csv dan dihapus sistem"
+echo ""
+
+read -p "Tekan [ENTER] untuk kembali ke menu..." dummy
+echo ""
+}
+
+
 update_status(){
 local nama status_baru
 echo ""
@@ -242,6 +260,7 @@ echo ""
                         break;
                 else
                         echo "Nama tidak ditemukan, coba lagi" >&2
+			tampilkan_daftar
                 fi
         done
         while true; do

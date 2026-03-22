@@ -1,7 +1,7 @@
 BEGIN {FS=",";choice = ARGV[2];delete ARGV[2]
 if (choice != "a" && choice != "b"&& choice != "c" && choice != "d" && choice != "e"){
 print"Soal tidak dikenali. Gunakan a,b,c,d atau e."; 
-print"Contoh penggunaan awk: - file.sh data.csv a"}
+print"Contoh penggunaan: awk -f file.sh data.csv a"}
 }
 
 NR > 1 {

@@ -8,10 +8,10 @@ Kelas   : A <br>
 ### Soal 1
 
 Pada soal 1 kita diberikan data penumpang di kereta dan diminta untuk menampilkan 
-a. Jumlah seluruh penumpang 
-b. Jumlah gerbong penumpang
-c. Penumpang tertua 
-d. Rata-rata usia penumpang 
+a. Jumlah seluruh penumpang <br>
+b. Jumlah gerbong penumpang <br>
+c. Penumpang tertua <br>
+d. Rata-rata usia penumpang <br>
 e. Jumlah penumpang *bussiness class*
 
 Langkah pertama sebelum kita menampilkan data. kita harus mendowload passenger.csv dari spreadsheet masuk ke repository menggunakan `wget -O`
@@ -20,26 +20,26 @@ Langkah pertama sebelum kita menampilkan data. kita harus mendowload passenger.c
 wget -O passenger.csv "https://docs.google.com/spreadsheets/d/1NHmyS6wRO7To7ta-NLOOLHkPS6valvNaX7tawsv1zfE/export?format=csv"
 ```
 
-A) Menghitung jumlah penumpang yang ada di kereta
+##### A) Menghitung jumlah penumpang yang ada di kereta
 ```sh
 BEGIN {FS=","}NR>1 {count++}
 END {print "Jumlah seluruh penumpang KANJ adalah ", count, " orang"}
 ```
-B) Menghitung jumlah gerbong yang ada dalam kereta dengan menghitung *length* dari array kolom ke-4 
+##### B) Menghitung jumlah gerbong yang ada dalam kereta dengan menghitung *length* dari array kolom ke-4 
 ```sh
 BEGIN {FS=","} NR>1 {carriage[$4]++}
 END {print"Jumlah gerbong penumpang KANJ adalah",length(carriage)}
 ```
-C) Mencari penumpang tertua dalam kereta dengan melakukan perbandingan di kolom ke-2 yang menyimpan umur, lalu ketika sudah selesai menyimpan nama penumpang tertua di `max_name`
+##### C) Mencari penumpang tertua dalam kereta dengan melakukan perbandingan di kolom ke-2 yang menyimpan umur, lalu ketika sudah selesai menyimpan nama penumpang tertua di `max_name`
 ```sh
 BEGIN{FS=","}NR>1{if($2>max) {max =$2;max_name=$1}}END {print max_name, "adalah penumpang kereta tertua dengan usia", max,"tahun"} 
 ```
-D) Menghitung rata-rata usia penumpang dengan menjumlahkan total umur di kolom ke-2 lalu membagi jumlah orang yang ada
+##### D) Menghitung rata-rata usia penumpang dengan menjumlahkan total umur di kolom ke-2 lalu membagi jumlah orang yang ada
 ```sh
 BEGIN {FS=","} NR>1 { total+=$2; count_person++ }
 END {print "Rata-rata usia penumpang adalah",total/count_person, "tahun" }
 ```
-E) Menhitung jumlah penumpang yang ada di bussiness class. Jika pada kolom ke-3 ditemukan "Businees" maka `count_business++`
+##### E) Menhitung jumlah penumpang yang ada di bussiness class. Jika pada kolom ke-3 ditemukan "Businees" maka `count_business++`
 ```sh
 BEGIN {FS=","} NR>1 {if ($3=="Business"){count_business++}}
 END {print "Jumlah penumpang business class ada", count_business}

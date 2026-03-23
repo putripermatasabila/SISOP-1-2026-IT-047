@@ -80,7 +80,7 @@ if (choice=="e")
 } 
 ```
 `ARGV` merupakan array yang menyimpan semua argumen di command line
-> - `ARGV[0]` = awk
-> - `ARGV[1]` = passenger.csv
-> - `ARGV[2]` = a/b/c/e
+- `ARGV[0]` = awk
+- `ARGV[1]` = passenger.csv
+- `ARGV[2]` = a/b/c/e
 

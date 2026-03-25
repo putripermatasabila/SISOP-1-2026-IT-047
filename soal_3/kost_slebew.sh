@@ -13,6 +13,15 @@ if [[ "$1" == "--check-tagihan" ]]; then
 fi 
 
 menu_display(){
+echo "   _  _                         _       ___    __              _                             "
+echo "  FJ / ;     ____      ____    FJ_     F __" " LJ    ____     FJ___      ____      _    _    "
+echo " J |/ (|    F __ J    F ___J  J  _|   J (___|  FJ   F __ J   J  __ J    F __ J    FJ .. L]   "
+echo " |     L   | |--| |  | '----_ | |-'   J\___ \ J  L | _____J  | |--| |  | _____J  | |/  \| |  "
+echo " F L:\  L  F L__J J  )-____  LF |__-..--___) \J  L F L___--. F L__J J  F L___--. F   /\   J  "
+echo "\J__L \\__LJ\______/FJ\______/F\_____/J\______JJ__LJ\______/FJ__,____/LJ\______/FJ\__//\\__/L"
+echo "|__L  \L_| J______F  J______F J_____F J______F|__| J______F J__,____F  J______F  \__/  \__/  "
+
+
 echo ""
 echo "========================================================="
 echo "             SISTEM MANAJEMEN KOST SLEBEW                "

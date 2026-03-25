@@ -26,3 +26,9 @@ Jumlah kamar terisi      : 2
 ----------------------------------------------------- 
 Daftar penghuni menunggak:  
   - salmon
+Total pemasukan (Aktif)  : Rp 90000
+Total tunggakan          : Rp1000000000
+Jumlah kamar terisi      : 2
+----------------------------------------------------- 
+Daftar penghuni menunggak:  
+  - salmon

@@ -84,5 +84,8 @@ if (choice=="e")
 - `ARGV[1]` = passenger.csv
 - `ARGV[2]` = a/b/c/e
 
+#### Output
+<img width="954" height="491" alt="Screenshot 2026-03-25 181037" src="https://github.com/user-attachments/assets/1a8e8f02-359f-4bf5-a9ab-ad50a690a385" />
+
 ### Soal 2
 

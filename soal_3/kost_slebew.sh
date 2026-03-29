@@ -1,6 +1,15 @@
 #!/bin/bash
 
 
+#pembuatan folder  terlebih dahulu sebelum jalan -p digunakan supaya folder sudah ada maka tidak usah membuat lagi
+mkdir -p data sampah log rekap
+
+#[ -f data/penghuni.csv ]  sama seperti test -f data/penghuni.csv -> dia retrun 0/1 
+[ -f data/penghuni.csv ] || touch data/penghuni.csv
+[ -f sampah/history_hapus.csv ] || touch sampah/history_hapus.csv
+[ -f log/tagihan.log ] || touch log/tagihan.log
+[ -f rekap/laporan_bulanan.txt ] || touch rekap/laporan_bulanan.txt
+
 if [[ "$1" == "--check-tagihan" ]]; then
 	#penggunaan " ada karena terdapat spasi beda saat di function hapus_penghuni 
 	cd /home/putri_permata_sabila/sisop/SISOP-1-2026-IT-047/soal_3

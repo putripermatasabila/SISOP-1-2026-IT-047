@@ -20,7 +20,7 @@ if (choice=="b")
 if (choice=="c")
 {print max_name, "adalah penumpang kereta tertua dengan usia",max,"tahun"}
 if (choice =="d")
-{print "Rata-rata usia penumpang adalah", total/count_person, "tahun"}
+{printf "Rata-rata usia penumpang adalah %d tahun\n", int(total/count_person + 0.5)}
 if (choice=="e")
 {print "Jumlah penumpang business class ada", count_business, "orang"}
 } 

@@ -89,3 +89,202 @@ if (choice=="e")
 
 ### Soal 2
 
+Pada soal 2 kita diberikan skenario ekspedisi pencarian pusaka di Gunung Kawi. Terdapat dua script utama yang dibuat:
+- `parserkoordinat.sh` — untuk mengekstrak data koordinat dari file JSON menjadi format CSV
+- `nemupusaka.sh` — untuk menghitung titik tengah lokasi pusaka berdasarkan dua titik diagonal
+
+#### Persiapan Awal
+
+Langkah pertama adalah mengunduh file peta PDF menggunakan `gdown`. Karena `gdown` belum terinstall, perlu install terlebih dahulu:
+
+```sh
+sudo apt install python3-pip
+pip install gdown
+```
+
+Setelah `gdown` tersedia, unduh file peta dari Google Drive dan simpan dengan nama sesuai ketentuan:
+
+```sh
+gdown --id <file_id> -O peta-ekspedisi-amba.pdf
+```
+
+#### Mencari Link Tersembunyi dalam PDF
+
+Setelah mendapatkan file PDF, langkah selanjutnya adalah mencari tautan tersembunyi di dalamnya. Ada dua cara yang bisa digunakan:
+
+```sh
+grep -a "http" peta-ekspedisi-amba.pdf
+```
+```sh
+awk '/http/' peta-ekspedisi-amba.pdf
+```
+
+Dari sana ditemukan link repository:
+```
+https://github.com/pocongcyber77/peta-gunung-kawi.git
+```
+
+Kemudian repository tersebut di-clone menggunakan SSH:
+
+```sh
+git clone git@github.com:pocongcyber77/peta-gunung-kawi.git
+```
+
+#### A) Mengekstrak Koordinat dari JSON (`parserkoordinat.sh`)
+
+Di dalam repository yang di-clone terdapat file `gsxtrack.json` yang berisi data titik lokasi dalam format JSON. Data ini masih mentah sehingga perlu di-parsing terlebih dahulu ke format yang lebih rapi.
+
+Script `parserkoordinat.sh` menggunakan `awk` untuk membaca file JSON baris per baris dan mengekstrak field yang dibutuhkan:
+
+```sh
+awk '
+/"id":/ && /"node_/ { gsub(/.*"id": "|",/, "", $0); id=$0 }
+/"site_name":/ { gsub(/.*"site_name": "|",/, "", $0); site=$0 }
+/"latitude":/  { gsub(/.*"latitude": |,/, "", $0); lat=$0 }
+/"longitude":/ { gsub(/.*"longitude": |,/, "", $0); lon=$0; print id","site","lat","lon }
+' gsxtrack.json | tee titik-penting.txt
+```
+
+Cara kerja `gsub` di sini adalah sebagai *global substitution* — mengganti semua kemunculan pola tertentu dalam baris dengan string lain. Pola `.*"id": "` artinya buang semua karakter dari awal sampai tanda kutip setelah `"id": `, dan `",` artinya buang sisa karakter di belakangnya. Hasilnya hanya nilai yang kita inginkan yang tersisa, lalu disimpan ke variabel. Setelah keempat field terkumpul (saat baris `longitude` dibaca), langsung di-print dalam satu baris dengan format `id,site_name,latitude,longitude`.
+
+Output disimpan ke `titik-penting.txt` menggunakan `tee`.
+
+#### B) Menghitung Titik Tengah Pusaka (`nemupusaka.sh`)
+
+Dari clue yang diberikan, lokasi pusaka berada tepat di titik tengah dari semua titik bekas ekspedisi. Titik-titik tersebut ternyata membentuk sebuah persegi, sehingga titik tengahnya bisa dicari dengan menghitung rata-rata koordinat dua titik yang berposisi diagonal — yaitu `node_001` dan `node_003`.
+
+```sh
+awk 'BEGIN {FS=","} /node_001|node_003/ {total_lat+=$3;total_long+=$4} 
+END {print "Koordinat pusat:";
+print total_lat/2","total_long/2}' titik-penting.txt | tee posisipusaka.txt
+```
+
+Script ini memfilter hanya baris yang mengandung `node_001` atau `node_003`, menjumlahkan latitude dan longitude keduanya, lalu membaginya dengan 2 untuk mendapat titik tengah. Hasilnya disimpan ke `posisipusaka.txt`.
+
+#### Output
+<!-- Tambahkan screenshot output di sini -->
+
+---
+
+### Soal 3
+
+Pada soal 3 kita diminta membuat program manajemen kost interaktif berbasis CLI menggunakan Bash script dan AWK. Program ini memiliki menu utama yang terus berjalan (*looping*) hingga user memilih Exit.
+
+#### Inisialisasi Folder dan File
+
+Sebelum program berjalan, script memastikan semua folder dan file yang dibutuhkan sudah ada:
+
+```sh
+mkdir -p data sampah log rekap
+
+[ -f data/penghuni.csv ] || touch data/penghuni.csv
+[ -f sampah/history_hapus.csv ] || touch sampah/history_hapus.csv
+[ -f log/tagihan.log ] || touch log/tagihan.log
+[ -f rekap/laporan_bulanan.txt ] || touch rekap/laporan_bulanan.txt
+```
+
+`mkdir -p` digunakan supaya jika folder sudah ada tidak akan error. `[ -f ... ]` adalah perintah `test` yang mengecek apakah file sudah ada — jika belum (`||`), baru dibuat dengan `touch`.
+
+#### 1) Tambah Penghuni Baru
+
+Fitur ini menambahkan data penghuni baru ke `data/penghuni.csv`. Setiap input divalidasi sebelum disimpan:
+
+```sh
+read -p "Masukkan Nama: " nama
+kamar=$(validate_kamar)
+harga_sewa=$(validate_harga_sewa)
+tanggal=$(insert_date)
+status=$(validate_status)
+
+echo "$nama,$kamar,$harga_sewa,$tanggal,$status" >> data/penghuni.csv
+```
+
+- `validate_kamar` — memastikan input angka positif dan nomor kamar belum ditempati dengan `grep -q`
+- `validate_harga_sewa` — memastikan input angka positif
+- `insert_date` — memanggil `validate_date` yang mengecek format `YYYY-MM-DD` dan memastikan tanggal tidak melebihi hari ini
+- `validate_status` — hanya menerima input `Aktif` atau `Menunggak`
+
+#### 2) Hapus Penghuni
+
+Fitur ini menghapus data penghuni dari database utama dan mengarsipkannya ke `sampah/history_hapus.csv` dengan tambahan tanggal penghapusan:
+
+```sh
+awk -v n="$nama" -v tgl="$tanggal_hapus" 'BEGIN {FS=","} $1==n {print $0","tgl}' data/penghuni.csv >> sampah/history_hapus.csv
+sed -i "/^$nama,/d" data/penghuni.csv
+```
+
+`awk` digunakan untuk menyalin baris yang cocok ke file arsip dengan tambahan kolom tanggal hapus. Setelah itu `sed -i` menghapus baris tersebut langsung dari file CSV.
+
+#### 3) Tampilkan Daftar Penghuni
+
+Fitur ini menampilkan seluruh data penghuni dalam format tabel yang rapi menggunakan `awk`:
+
+```sh
+awk 'BEGIN {FS=","; aktif=0; menunggak=0}
+$5=="Aktif" {aktif++}
+$5=="Menunggak" {menunggak++}
+{printf " %-3d| %-14s| %-6s| %-15s| %s\n", NR, $1, $2, $3, $5}
+END {
+print "Total: " NR " penghuni | Aktif: " aktif " | Menunggak: " menunggak
+}' data/penghuni.csv
+```
+
+`printf` dengan format `%-Nd` digunakan untuk rata kiri dengan lebar kolom tetap sehingga tampilan tabel konsisten. Di blok `END` ditampilkan ringkasan jumlah penghuni aktif dan menunggak.
+
+#### 4) Update Status Penghuni
+
+Fitur ini mengubah status penghuni (antara `Aktif` dan `Menunggak`) menggunakan `awk` dengan teknik file sementara:
+
+```sh
+awk -v n="$nama" -v s="$status_baru" 'BEGIN{FS=OFS=","} $1==n {$5=s} 1' data/penghuni.csv > data/tmp.csv && mv data/tmp.csv data/penghuni.csv
+```
+
+`OFS=","` memastikan field separator output tetap koma saat `awk` merekonstruksi baris. Pola `1` di akhir artinya print semua baris (true condition). Hasil ditulis ke file sementara `tmp.csv` lalu di-rename menggantikan file asli.
+
+#### 5) Cetak Laporan Keuangan
+
+Fitur ini menghitung total pemasukan, tunggakan, dan menampilkan daftar penghuni yang menunggak menggunakan `awk`:
+
+```sh
+awk 'BEGIN {FS=","; total_pemasukan=0; total_tunggakan=0}
+{if ($5=="Aktif") {total_pemasukan+=$3}
+ if ($5=="Menunggak") {total_tunggakan+=$3; nama_menunggak[$1]++}}
+END {
+printf "Total pemasukan (Aktif)  : Rp %d\n", total_pemasukan
+printf "Total tunggakan          : Rp%d\n", total_tunggakan
+for (n in nama_menunggak) printf "  - %s\n", n
+}' data/penghuni.csv | tee -a rekap/laporan_bulanan.txt
+```
+
+Array `nama_menunggak` digunakan untuk mengumpulkan nama penghuni yang menunggak tanpa duplikasi. Output ditampilkan ke terminal sekaligus di-append ke `rekap/laporan_bulanan.txt` menggunakan `tee -a`.
+
+#### 6) Kelola Cron (Pengingat Tagihan)
+
+Fitur ini mengelola cron job untuk pengingat tagihan otomatis. Terdapat tiga sub-fitur: lihat, daftarkan, dan hapus cron job.
+
+Saat script dipanggil dengan argumen `--check-tagihan` (oleh cron), script akan mencari penghuni yang menunggak dan mencatatnya ke log:
+
+```sh
+if [[ "$1" == "--check-tagihan" ]]; then
+    date_automate_save=$(date "+%Y-%m-%d %H:%M:%S")
+    awk -v das="$date_automate_save" 'BEGIN {FS=","} $5=="Menunggak" {
+    print "["das"] TAGIHAN: "$1 "(Kamar " $2") -Menunggak Rp"$3
+    }' data/penghuni.csv >> log/tagihan.log
+    exit 0
+fi
+```
+
+Untuk mendaftarkan cron job baru, mekanismenya adalah dengan mengambil daftar crontab yang ada, membuang entri lama (jika ada), lalu menambahkan entri baru:
+
+```sh
+crontab -l 2>/dev/null | grep -v "kost_slebew.sh --check-tagihan" > mycron
+echo "$minutes $hour * * * $(realpath $0) --check-tagihan" >> mycron
+crontab mycron
+rm mycron
+```
+
+`crontab -l` untuk list cron aktif, `2>/dev/null` membuang error jika belum ada cron sama sekali. `grep -v` mengambil semua baris kecuali entri lama. `realpath $0` digunakan agar path script selalu absolute sehingga cron bisa menemukannya dari mana saja.
+
+#### Output
+<!-- Tambahkan screenshot output di sini -->
+

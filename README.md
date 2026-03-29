@@ -148,9 +148,8 @@ awk '
 ' gsxtrack.json | tee titik-penting.txt
 ```
 
-Cara kerja `gsub` di sini adalah sebagai *global substitution*, yaitu mengganti semua kemunculan pola tertentu dalam baris dengan string lain. <br>
-Pola `.*"id": "` artinya buang semua karakter dari awal sampai tanda kutip setelah `"id": `, dan `",` artinya buang sisa karakter di belakangnya. <br>
-Hasilnya hanya nilai yang kita inginkan yang tersisa, lalu disimpan ke variabel. Setelah keempat field terkumpul (saat baris `longitude` dibaca), langsung di-print dalam satu baris dengan format `id,site_name,latitude,longitude`. <br>
+Cara kerja `gsub`  *global substitution* mengganti semua kemunculan pola tertentu dalam baris dengan string lain. <br>
+- Pola `.*"id": "` artinya buang semua karakter dari awal sampai tanda kutip setelah `"id": `, dan `",` artinya buang sisa karakter di belakangnya. Hasilnya hanya nilai yang kita inginkan yang tersisa, lalu disimpan ke variabel. Setelah keempat field terkumpul (saat baris `longitude` dibaca), langsung di-print dalam satu baris dengan format `id,site_name,latitude,longitude`.
 
 `tee` digunakan untuk menyimpan di file tujuan sekalian menampilkan outpun pada terminal
 
@@ -177,7 +176,7 @@ Pada soal 3 kita diminta membuat program manajemen kost interaktif berbasis CLI 
 
 #### Inisialisasi Folder dan File
 
-Sebelum program berjalan, script memastikan semua folder dan file yang dibutuhkan sudah ada:
+Sebelum program berjalan, script memastikan semua folder dan file yang dibutuhkan sudah ada <br>
 ***terdapat revisi dari asprak -> pada saat demo masih belum otomatis inisialisasi saat ./kost_slebew.sh dijalankan.**
 
 ```sh
@@ -190,6 +189,11 @@ mkdir -p data sampah log rekap
 ```
 
 `-p` pada `mkdir` digunakan supaya jika folder sudah ada tidak akan error. `[ -f ... ]` adalah perintah `test` yang mengecek apakah file sudah ada, jika belum (`||`), baru dibuat dengan `touch`.
+
+#### Output
+<img width="1169" height="652" alt="Screenshot 2026-03-29 213648" src="https://github.com/user-attachments/assets/de00bac3-9aa6-4c80-8817-c1652f3e8da5" />
+
+<img width="1102" height="272" alt="Screenshot 2026-03-29 213742" src="https://github.com/user-attachments/assets/112682e4-ba93-46ed-b6ff-87d0b0b970ab" />
 
 #### 1) Tambah Penghuni Baru
 
@@ -280,6 +284,12 @@ validate_status(){
 ```
 Hanya menerima string `Aktif` atau `Menunggak`, selain itu ditolak.
 
+#### Output
+<img width="1136" height="968" alt="Screenshot 2026-03-29 214013" src="https://github.com/user-attachments/assets/60a2b2d3-6b5c-4e94-aeb0-11c864d5a92d" />
+
+<img width="1130" height="736" alt="Screenshot 2026-03-29 213938" src="https://github.com/user-attachments/assets/2cbda14b-3998-416d-9569-d76d90ec8913" />
+
+
 #### 2) Hapus Penghuni
 
 Fitur ini menghapus data penghuni dari database utama dan mengarsipkannya ke `sampah/history_hapus.csv` dengan tambahan tanggal penghapusan:
@@ -290,6 +300,13 @@ sed -i "/^$nama,/d" data/penghuni.csv
 ```
 
 `awk` digunakan untuk menyalin baris yang cocok ke file arsip dengan tambahan kolom tanggal hapus. Setelah itu `sed -i` menghapus baris tersebut langsung dari file CSV.
+
+#### Output
+<img width="1231" height="939" alt="image" src="https://github.com/user-attachments/assets/7c433c0a-7118-42ee-b7d1-0c9983cdaa44" />
+<img width="1133" height="798" alt="image" src="https://github.com/user-attachments/assets/9b7f4df7-cb2a-4713-be09-b8e03221c1bd" />
+
+
+
 
 #### 3) Tampilkan Daftar Penghuni
 
@@ -304,6 +321,8 @@ END {
 print "Total: " NR " penghuni | Aktif: " aktif " | Menunggak: " menunggak
 }' data/penghuni.csv
 ```
+#### Output
+<img width="1139" height="657" alt="image" src="https://github.com/user-attachments/assets/27dca96d-a601-4bca-a2bf-245761aaaaa4" />
 
 `printf` dengan format `%-Nd` digunakan untuk rata kiri dengan lebar kolom tetap sehingga tampilan tabel konsisten. Di blok `END` ditampilkan ringkasan jumlah penghuni aktif dan menunggak.
 
@@ -316,6 +335,9 @@ awk -v n="$nama" -v s="$status_baru" 'BEGIN{FS=OFS=","} $1==n {$5=s} 1' data/pen
 ```
 
 `OFS=","` memastikan field separator output tetap koma saat `awk` merekonstruksi baris. Pola `1` di akhir artinya print semua baris (true condition). Hasil ditulis ke file sementara `tmp.csv` lalu di-rename menggantikan file asli.
+
+#### Output
+<img width="776" height="952" alt="image" src="https://github.com/user-attachments/assets/948376e2-2456-4054-ac03-67c3fa25f46e" />
 
 #### 5) Cetak Laporan Keuangan
 
@@ -333,6 +355,8 @@ for (n in nama_menunggak) printf "  - %s\n", n
 ```
 
 Array `nama_menunggak` digunakan untuk mengumpulkan nama penghuni yang menunggak tanpa duplikasi. Output ditampilkan ke terminal sekaligus di-append ke `rekap/laporan_bulanan.txt` menggunakan `tee -a`.
+#### Output
+<img width="1113" height="702" alt="Screenshot 2026-03-29 215439" src="https://github.com/user-attachments/assets/db398161-7186-4d8a-ac0c-b2a7b99a43c6" />
 
 #### 6) Kelola Cron (Pengingat Tagihan)
 
@@ -362,4 +386,12 @@ rm mycron
 `crontab -l` untuk list cron aktif, `2>/dev/null` membuang error jika belum ada cron sama sekali. `grep -v` mengambil semua baris kecuali entri lama. `realpath $0` digunakan agar path script selalu absolute sehingga cron bisa menemukannya dari mana saja.
 
 #### Output
+<img width="1136" height="968" alt="Screenshot 2026-03-29 214013" src="https://github.com/user-attachments/assets/58bea9ad-2516-4ce3-ad99-809422bffac6" />
+<img width="1188" height="942" alt="Screenshot 2026-03-29 214303" src="https://github.com/user-attachments/assets/1cb4aa7d-c0df-4a46-8df7-7024cdf24037" />
+<img width="1139" height="657" alt="Screenshot 2026-03-29 214430" src="https://github.com/user-attachments/assets/63416cb3-16fe-4bb2-b5aa-cf7b662be0dc" />
 
+### Kendala saat mengerjakan 
+- Stuck lama pada saat di soal 2 karena ide awalnya yang didapat untuk bagaiman bisa dapat link di dalam teks pdf itu menggunakan tools lain. Cara itu dengan memecah-mecah gamabr jadi kecil- kecil dan kita cari per-gambar satu-satu. Lalu sadar cara itu tidak masuk akal.Kemudian, berpikir apa bisa pake cara awk (yang masih ada dimateri) atau cara lain dan memang ternyata bisa memakai `awk` dan `grep`. Menyesal tidak berpikir secara gampang dahulu tetapi terlalu berpikir rumit di awal.
+- Stuck lama untuk menemukan cara parsing file, diawal cara yang pertama kali yang saya temukan itu cukup ribet memakai tools `jq`. Akan tetapi, ternyata file tersebut masih bisa diselesaikan dengan awk dengan cara yang lebih sederhana.
+- Sempat terdapat error saat melakukan git push padahal belum melakukan git pull, sehingga sedikit membuat terhambat
+- Lambatnya pengerjaan soal 3 dibanding 2 soal lainnya. Sebab soal 3 memang alur panjang. Seharusnya secara ideal, seharusnya saya tidak selama itu untuk pengerjaannya dibanding soal 1 dan soal 2.
